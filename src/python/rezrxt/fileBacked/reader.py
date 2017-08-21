@@ -13,6 +13,10 @@ from os.path import join as pjoin
 from os import listdir
 from functools import reduce
 import json
+import time
+import datetime
+from calendar import timegm
+
 from rezrxt.dbInterface import RezRxtDbReaderI
  
 class RezRxtDbMgr(object):
@@ -170,8 +174,8 @@ class RezRxtDbReader(RezRxtDbReaderI):
         with open(rxt_file) as fh:
             data = json.load(fh)
             return data
-            
-    
+
+
     def contexts(self):
         """
         Return a generator of contexts.
@@ -208,7 +212,7 @@ class RezRxtDbReader(RezRxtDbReaderI):
           Generator over timestamps.
 
         Raises:
-          KeyError: If supplied iwth non-extant keys.
+          KeyError: If supplied with non-extant keys.
         """
 
         return self.rez_rxt_mgr.timestamps(context, name)
