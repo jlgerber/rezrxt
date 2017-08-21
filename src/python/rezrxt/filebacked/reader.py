@@ -15,7 +15,7 @@ from os import listdir
 from functools import reduce
 import json
 
-from rezrxt.dbInterface import RezRxtDbReaderI
+from rezrxt.dbinterface import RezRxtDbReaderI
  
 
 class RezRxtDbMgr(object):
