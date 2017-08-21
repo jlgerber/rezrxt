@@ -152,7 +152,7 @@ class RezRxtDbReader(RezRxtDbReaderI):
         self.rez_rxt_mgr = RezRxtDbMgr(root_db)
         super(RezRxtDbReader, self).__init__()
         
-    def get_rxt(self, context, name, timestamp, approximate=False):
+    def rxt_dict(self, context, name, timestamp, approximate=False):
         """
         Retrieve a python dictionary matching the name, context, and timestamp.
 
@@ -216,7 +216,7 @@ class RezRxtDbReader(RezRxtDbReaderI):
 
         return self.rez_rxt_mgr.timestamps(context, name)
 
-    def rxts(self, context, name):
+    def rxt_files(self, context, name):
         """
         Return a generator of rxt files.
 
