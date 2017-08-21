@@ -8,17 +8,16 @@ root/
       timestamp/
          context-name-timestamp.rxt
 """
+
 from os.path import isdir, isfile
 from os.path import join as pjoin
 from os import listdir
 from functools import reduce
 import json
-import time
-import datetime
-from calendar import timegm
 
 from rezrxt.dbInterface import RezRxtDbReaderI
  
+
 class RezRxtDbMgr(object):
     """
     Common file db manager operations.
