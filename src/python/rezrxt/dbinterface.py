@@ -5,7 +5,7 @@ class RezRxtDbReaderI(object):
     """
     Rez Resolve Database Reader Interface.
     """
-    def rxt_dict(self, name, context, timestamp):
+    def rxt_dict(self, name, context, timestamp, approximate=False):
         """
         Retrieve a python dictionary matching the name, context, and timestamp.
 
@@ -13,6 +13,7 @@ class RezRxtDbReaderI(object):
             name (str): Name of the package.
             context (str): Context of the package.
             timestamp (int): Timestamp of the resolve.
+	    approximate (booll): Whether to allow fuzzy timestamp values.
         """
         raise NotImplementedError()
 

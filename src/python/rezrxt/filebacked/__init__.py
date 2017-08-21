@@ -1,4 +1,0 @@
-"""
-File backed database implementation.
-"""
- 

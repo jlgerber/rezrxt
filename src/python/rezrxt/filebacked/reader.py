@@ -12,8 +12,8 @@ root/
 from os.path import isdir, isfile
 from os.path import join as pjoin
 from os import listdir
-# done for forward compatibility purposes - with python3
-from functools import reduce
+# uncomment for python3
+# from functools import reduce
 import json
 
 from rezrxt.dbinterface import RezRxtDbReaderI
@@ -78,8 +78,8 @@ class RezRxtDbMgr(object):
             raise KeyError("No timestamps exist for context:\"{0}\" and name:\"{1}\""\
                           .format(context, name))
         # td: protect from cruft. verify that we are returning an integer.
-        for ts in listdir(tsdir):
-            yield int(ts)
+        for tstamp in listdir(tsdir):
+            yield int(tstamp)
 
     def resolve(self, context, name, timestamp, approximate=False):
         """
@@ -188,8 +188,8 @@ class RezRxtDbReader(RezRxtDbReaderI):
         """
         rxt_file = self.rez_rxt_mgr.resolve(context, name, timestamp, approximate)
 
-        with open(rxt_file) as fh:
-            data = json.load(fh)
+        with open(rxt_file) as f_handle:
+            data = json.load(f_handle)
             return data
 
 
