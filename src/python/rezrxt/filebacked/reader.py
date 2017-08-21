@@ -12,11 +12,12 @@ root/
 from os.path import isdir, isfile
 from os.path import join as pjoin
 from os import listdir
+# done for forward compatibility purposes - with python3
 from functools import reduce
 import json
 
 from rezrxt.dbinterface import RezRxtDbReaderI
- 
+
 
 class RezRxtDbMgr(object):
     """
@@ -28,7 +29,7 @@ class RezRxtDbMgr(object):
         """
         assert isdir(root_db) is True, "root_db \"{0}\" is not a valid directory."
         self._root_db = root_db
-        
+
     def contexts(self):
         """
         Return an generator iterator over contexts.
@@ -54,7 +55,7 @@ class RezRxtDbMgr(object):
             raise KeyError("No packages exist for \"{0}\" context".format(context))
         for name in listdir(namesdir):
             yield name
-            
+
     def timestamps(self, context, name):
         """
         Returns a generator over timestamps.
@@ -74,8 +75,9 @@ class RezRxtDbMgr(object):
             raise KeyError("No packages exist for \"{0}\" context".format(context))
         tsdir = pjoin(namesdir, name)
         if not isdir(tsdir):
-            raise KeyError("No timestamps exist for context:\"{0}\" and name:\"{1}\"".format(context, name))
-        # TODO: protect from cruft. verify that we are returning an integer.
+            raise KeyError("No timestamps exist for context:\"{0}\" and name:\"{1}\""\
+                          .format(context, name))
+        # td: protect from cruft. verify that we are returning an integer.
         for ts in listdir(tsdir):
             yield int(ts)
 
@@ -87,7 +89,8 @@ class RezRxtDbMgr(object):
           context (str): The context name.
           name (str): The package name.
           timestamp (int): The timestamp.
-          approximate (bool): If true, find the closest timestamp less than or equal to the one provided.
+          approximate (bool): If true, find the closest timestamp less than or
+                              equal to the one provided.
 
         Returns:
           Path to rxt file.
@@ -102,44 +105,52 @@ class RezRxtDbMgr(object):
             raise KeyError("No packages exist for \"{0}\" context".format(context))
         tsdir = pjoin(namesdir, name)
         if not isdir(tsdir):
-            raise KeyError("No timestamps exist for context:\"{0}\" and name:\"{1}\"".format(context, name))
-        
+            raise KeyError("No timestamps exist for context:\"{0}\" and name:\"{1}\""\
+                .format(context, name))
+
         resolvedir = None
 
         if approximate is True:
             # get a find the most 
             def tst(x, y):
-    
-                if y <= timestmap and x <= timestamp:
+
+                if y <= timestamp and x <= timestamp:
                     return y if y >= x else x
                 if y <= timestamp:
                     return y
                 if x <= timestamp:
                     return x
                 return 0
-            exact_ts = reduce(tst, (int(x) for x in self.timestamps(context, name))) 
+            exact_ts = reduce(tst, (int(x) for x in self.timestamps(context, name)))
 
             if exact_ts == 0:
-                raise RuntimeError("Unable to find exact timestamp for {0} {1} given {2}".format(context, name, timestamp_str))
+                raise RuntimeError("Unable to find exact timestamp for {0} {1} given {2}"\
+                                  .format(context, name, timestamp_str))
 
             resolvedir = pjoin(tsdir, str(exact_ts))
             timestamp_str = str(exact_ts)
             if not isdir(resolvedir):
-                raise KeyError("No resolve exists for context:\"{0}\" name:\"{1}\" derived timestamp: {2}".format(context, name, str(exact_ts)))
+                raise KeyError(("No resolve exists for context:\"{0}\" name:\"{1}\""
+                                "derived timestamp: {2}")\
+                              .format(context, name, str(exact_ts)))
         else:
             resolvedir = pjoin(tsdir, timestamp_str)
 
             if not isdir(resolvedir):
-                raise KeyError("No resolve exists for context:\"{0}\" name:\"{1}\" timestamp: {2}".format(context, name, str(timestamp)))
-        
+                raise KeyError(("No resolve exists for context:\"{0}\" "
+                                "name:\"{1}\" timestamp: {2}")\
+                                .format(context, name, str(timestamp)))
+
         resolve_file = "{0}-{1}-{2}.rxt".format(context, name, timestamp_str)
         resolve_fullpath = pjoin(resolvedir, resolve_file)
 
         if not isfile(resolve_fullpath):
-            raise KeyError("No rxt file \"{3}\" exists for context:\"{0}\" name:\"{1}\" timestamp: {2}".format(context, name, str(timestamp), resolve_fullpath))
+            raise KeyError(("No rxt file \"{3}\" exists for context:\"{0}\" "
+                            "name:\"{1}\" timestamp: {2}")\
+                            .format(context, name, str(timestamp), resolve_fullpath))
         return resolve_fullpath
 
-        
+ 
 class RezRxtDbReader(RezRxtDbReaderI):
     def __init__(self, root_db):
         """

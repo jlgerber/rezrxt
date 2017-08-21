@@ -5,7 +5,7 @@ class RezRxtDbReaderI(object):
     """
     Rez Resolve Database Reader Interface.
     """
-    def get_rxt(self, name, context, timestamp):
+    def rxt_dict(self, name, context, timestamp):
         """
         Retrieve a python dictionary matching the name, context, and timestamp.
 
@@ -16,33 +16,33 @@ class RezRxtDbReaderI(object):
         """
         raise NotImplementedError()
 
-    def get_rxt_timestamps(self, name, context):
+    def timestamps(self, name, context):
         """
         Retrieve a list of resolves' timestamps matching the name and context.
-        
+
         Args:
           name (str): Name of package.
           context (str): Context of package.
         """
         raise NotImplementedError()
 
-    def get_rxt_names(self, context):
+    def names(self, context):
         """
         Given a context, return the names of all the resolves tracked by the Rez Resolve DB.
         Args:
           context (str): The context of the resolves.
-        
+
         Returns:
            List of package names tracked within the context.
         """
         raise NotImplementedError()
 
-    def get_rxt_contexts(self, name):
+    def contexts(self, name):
         """
         Given a package name, retrieve all of the contexts in which it is defined.
         Args:
           name (str): The name of the package.
-        
+
         Returns:
           A list of contexts.
         """
@@ -81,4 +81,3 @@ class RezRxtDbWriterI(object):
           KeyError: if a composite key constructed by the supplied components does not exist.
         """
         raise NotImplementedError()
-

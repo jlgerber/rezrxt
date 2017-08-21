@@ -13,28 +13,26 @@ def gmtime_to_epoc(gmtime):
     """
     Convert gmtime string to epoc time.
     """
-    dt = datetime.datetime.strptime(gmtime, "%a %b %d %H:%M:%S %Y")
-    return timegm(dt.timetuple())
+    date_t = datetime.datetime.strptime(gmtime, "%a %b %d %H:%M:%S %Y")
+    return timegm(date_t.timetuple())
 
 
 def localtime_to_epoc(localtime):
     """
     Convert localtime to epoc.
     """
-    raise NotImplementedError()
+    raise NotImplementedError("localtime_to_epoc not implemented: {0}".format(localtime))
 
 
 def epoc_to_gm_asctime(epoc):
     """
     Convert seconds since epoc to gmtime.
-    """ 
-    time.asctime(time.gmtime(x))
+    """
+    time.asctime(time.gmtime(epoc))
 
 
 def epoc_to_loc_asctime(epoc):
     """
     Convert seconds since epoc to gmtime.
-    """ 
-    time.asctime(time.localtime(x))
-    
-    
+    """
+    time.asctime(time.localtime(epoc))
