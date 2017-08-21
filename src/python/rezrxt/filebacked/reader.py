@@ -3,10 +3,10 @@ reader implementation.
 
 We implement a disk-based database with the following structure:
 root/
-  context/
-    name/
-      timestamp/
-         context-name-timestamp.rxt
+    context/
+        name/
+            timestamp/
+                context-name-timestamp.rxt
 """
 
 from os.path import isdir, isfile
@@ -42,13 +42,13 @@ class RezRxtDbMgr(object):
         Given a context name, return an iterator over names.
 
         Args:
-          context (str): The context name. (eg fx, or model)
+            context (str): The context name. (eg fx, or model)
 
         Returns:
-          name generator
+            name generator
 
         Raises:
-          KeyError: If the db does not contain the supplied context.
+            KeyError: If the db does not contain the supplied context.
         """
         namesdir = pjoin(self._root_db, context)
         if not isdir(namesdir):
@@ -61,14 +61,14 @@ class RezRxtDbMgr(object):
         Returns a generator over timestamps.
 
         Args:
-          context (str): context name.
-          name (str): package name
+            context (str): context name.
+            name (str): package name
 
         Returns:
-          Generator over timestamps.
+            Generator over timestamps.
 
         Raises:
-          KeyError: If the database does not contain the context or name.
+            KeyError: If the database does not contain the context or name.
         """
         namesdir = pjoin(self._root_db, context)
         if not isdir(namesdir):
@@ -86,17 +86,17 @@ class RezRxtDbMgr(object):
         Return the full path to a resolve.
 
         Args:
-          context (str): The context name.
-          name (str): The package name.
-          timestamp (int): The timestamp.
-          approximate (bool): If true, find the closest timestamp less than or
-                              equal to the one provided.
+            context (str): The context name.
+            name (str): The package name.
+            timestamp (int): The timestamp.
+            approximate (bool): If true, find the closest timestamp less than or
+                                equal to the one provided.
 
         Returns:
-          Path to rxt file.
+            Path to rxt file.
 
         Raises:
-          KeyError: If db is missing either the context, name, or timestmap.
+            KeyError: If db is missing either the context, name, or timestmap.
         """
         timestamp_str = str(timestamp)
 
@@ -111,16 +111,19 @@ class RezRxtDbMgr(object):
         resolvedir = None
 
         if approximate is True:
-            # get a find the most 
-            def tst(x, y):
-
-                if y <= timestamp and x <= timestamp:
-                    return y if y >= x else x
-                if y <= timestamp:
-                    return y
-                if x <= timestamp:
-                    return x
+            # get a find the most
+            def tst(xarg, yarg):
+                """
+                Get the closest value to the timestamp.
+                """
+                if yarg <= timestamp and xarg <= timestamp:
+                    return yarg if yarg >= xarg else xarg
+                if yarg <= timestamp:
+                    return yarg
+                if xarg <= timestamp:
+                    return xarg
                 return 0
+
             exact_ts = reduce(tst, (int(x) for x in self.timestamps(context, name)))
 
             if exact_ts == 0:
@@ -150,37 +153,41 @@ class RezRxtDbMgr(object):
                             .format(context, name, str(timestamp), resolve_fullpath))
         return resolve_fullpath
 
- 
+
 class RezRxtDbReader(RezRxtDbReaderI):
+    """
+    Database Reader.
+    """
     def __init__(self, root_db):
         """
         Args:
-          root_db (str): path to root of database.
+            root_db (str): path to root of database.
 
         Raises:
-          AssertionError: If path does not exist.
+            AssertionError: If path does not exist.
         """
         self.rez_rxt_mgr = RezRxtDbMgr(root_db)
         super(RezRxtDbReader, self).__init__()
-        
+
     def rxt_dict(self, context, name, timestamp, approximate=False):
         """
         Retrieve a python dictionary matching the name, context, and timestamp.
 
         Args:
-          context (str): Context of the package.
-          name (str): Name of the package.
-          timestamp (int): Timestamp of the resolve.
-          approximate (bool) : Whether to get the nearest timestamp, less than or equal to timestamp.
+            context (str): Context of the package.
+            name (str): Name of the package.
+            timestamp (int): Timestamp of the resolve.
+            approximate (bool) : Whether to get the nearest timestamp,
+                                 less than or equal to timestamp.
 
         Returns:
-          python dict
+            python dict
 
         Raises:
-           RuntimeError if not extant.
+            RuntimeError if not extant.
         """
         rxt_file = self.rez_rxt_mgr.resolve(context, name, timestamp, approximate)
-        
+
         with open(rxt_file) as fh:
             data = json.load(fh)
             return data
@@ -192,37 +199,37 @@ class RezRxtDbReader(RezRxtDbReaderI):
         """
 
         return self.rez_rxt_mgr.contexts()
-        
+
 
     def names(self, context):
         """
         Return a generator of names within the supplied context.
-        
+
         Args:
-          context: Context name.
-        
+            context: Context name.
+
         Returns:
-          generator of names.
+            generator of names.
 
         Raises:
-          KeyError: If context does not exist in DB.
+            KeyError: If context does not exist in DB.
         """
         return self.rez_rxt_mgr.names(context)
 
-    
+
     def timestamps(self, context, name):
         """
         Return a generator of timestamps within the supplied context and name.
 
         Args:
-          context (str): Context name.
-          name (str): Package name.
-        
+            context (str): Context name.
+            name (str): Package name.
+
         Returns:
-          Generator over timestamps.
+            Generator over timestamps.
 
         Raises:
-          KeyError: If supplied with non-extant keys.
+            KeyError: If supplied with non-extant keys.
         """
 
         return self.rez_rxt_mgr.timestamps(context, name)
@@ -232,17 +239,14 @@ class RezRxtDbReader(RezRxtDbReaderI):
         Return a generator of rxt files.
 
         Args:
-          context (str): context name.
-          name (str): Package name.
-          
+            context (str): context name.
+            name (str): Package name.
+
         Returns:
-          generator over rxt files.
+            generator over rxt files.
 
         Raises:
-          KeyError: if supplied with non-extant keys.
+            KeyError: if supplied with non-extant keys.
         """
-        for ts in self.rez_rxt_mgr.timestamps(context, name):
-            yield self.rez_rxt_mgr.resolve(context, name, ts)
-
-    
-
+        for t_stamp in self.rez_rxt_mgr.timestamps(context, name):
+            yield self.rez_rxt_mgr.resolve(context, name, t_stamp)
