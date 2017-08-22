@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+
+"""
+rezrxt-add
+    add to a database.
+"""
+
+from os.path import isdir, realpath
+from os import environ
+import json
+import argparse
+
+from rezrxt.filebacked import writer
+
+def add(db_root, context, name, rxtfile):
+    """
+    add an rxtfile to a database
+    """
+    write_mgr = writer.RezRxtDbWriter(db_root)
+    with open(rxtfile) as json_data:
+        rxt_data = json.load(json_data)
+        print "adding context:{0} name:{1} rxt file:{2}".format(context, name, rxtfile)
+        write_mgr.add_rxt(context, name, rxt_data)
+
+def main():
+    """
+    Main entry point
+    """
+    parser = argparse.ArgumentParser(usage="Usage: rezrxt-add <context> <name> <rxtfile>",
+                                     description='Add resolve to the rez rxt database.')
+    parser.add_argument('context', metavar='context', type=str,
+                        help='the context')
+    parser.add_argument('name', metavar='name', type=str,
+                        help='the name')
+    parser.add_argument('rxtfile', metavar='rxtfile', type=str,
+                        help='the rxt file')
+    parser.add_argument('--db', dest='database',
+                        help='Optionally provide a path to the root database directory.')
+
+    args = parser.parse_args()
+
+    db_root = args.database or environ.get("REZTXT_DB_ROOT")
+
+    if db_root is None:
+        print parser.usage
+        exit(0)
+    else:
+        db_root = realpath(db_root)
+
+    if not isdir(db_root):
+        print parser.usage
+        print "\nfile \"{0}\" is not an directory\n".format(db_root)
+        exit(0)
+
+    rxt = args.rxtfile
+
+    if not rxt.endswith("rxt"):
+        print parser.usage
+        print "\nfile \"{0}\" is not an rxt file\n".format(rxt)
+        exit(0)
+
+    add(db_root, args.context, args.name, rxt)
+
+if __name__ == "__main__":
+    main()

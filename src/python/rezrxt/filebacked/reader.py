@@ -86,7 +86,7 @@ class RezRxtDbReadMgr(object):
 
         Args:
             context (str): context name.
-            name (str): package name
+            name    (str): package name
 
         Returns:
             Generator over timestamps.
@@ -110,9 +110,9 @@ class RezRxtDbReadMgr(object):
         Return the full path to a resolve.
 
         Args:
-            context (str): The context name.
-            name (str): The package name.
-            timestamp (int): The timestamp.
+            context      (str): The context name.
+            name         (str): The package name.
+            timestamp    (int): The timestamp.
             approximate (bool): If true, find the closest timestamp less than or
                                 equal to the one provided.
 
@@ -198,11 +198,11 @@ class RezRxtDbReader(RezRxtDbReaderI):
         Retrieve a python dictionary matching the name, context, and timestamp.
 
         Args:
-            context (str): Context of the package.
-            name (str): Name of the package.
-            timestamp (int): Timestamp of the resolve.
-            approximate (bool) : Whether to get the nearest timestamp,
-                                 less than or equal to timestamp.
+            context      (str): Context of the package.
+            name         (str): Name of the package.
+            timestamp    (int): Timestamp of the resolve.
+            approximate (bool): Whether to get the nearest timestamp,
+                                less than or equal to timestamp.
 
         Returns:
             python dict
@@ -247,7 +247,7 @@ class RezRxtDbReader(RezRxtDbReaderI):
 
         Args:
             context (str): Context name.
-            name (str): Package name.
+            name    (str): Package name.
 
         Returns:
             Generator over timestamps.
@@ -263,8 +263,8 @@ class RezRxtDbReader(RezRxtDbReaderI):
         Return a generator of rxt files.
 
         Args:
-            context (str): context name.
-            name (str): Package name.
+            context (str): ontext name.
+            name    (str): Package name.
 
         Returns:
             generator over rxt files.
@@ -274,3 +274,9 @@ class RezRxtDbReader(RezRxtDbReaderI):
         """
         for t_stamp in self.rez_rxt_mgr.timestamps(context, name):
             yield self.rez_rxt_mgr.resolve(context, name, t_stamp)
+
+    def resolve(self, context, name, timestamp, approximate=False):
+        """
+        Get the rxt file matching the parameters
+        """
+        return self.rez_rxt_mgr.resolve(context, name, timestamp, approximate)

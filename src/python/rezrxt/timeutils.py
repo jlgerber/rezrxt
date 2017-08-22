@@ -28,11 +28,11 @@ def epoc_to_gm_asctime(epoc):
     """
     Convert seconds since epoc to gmtime.
     """
-    time.asctime(time.gmtime(epoc))
+    return time.asctime(time.gmtime(epoc))
 
 
 def epoc_to_loc_asctime(epoc):
     """
     Convert seconds since epoc to gmtime.
     """
-    time.asctime(time.localtime(epoc))
+    return time.asctime(time.localtime(epoc))

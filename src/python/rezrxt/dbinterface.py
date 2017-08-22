@@ -5,25 +5,25 @@ class RezRxtDbReaderI(object):
     """
     Rez Resolve Database Reader Interface.
     """
-    def rxt_dict(self, name, context, timestamp, approximate=False):
+    def rxt_dict(self, context, name, timestamp, approximate=False):
         """
         Retrieve a python dictionary matching the name, context, and timestamp.
 
         Args:
-            name (str): Name of the package.
-            context (str): Context of the package.
+            context   (str): Context of the package.
+            name      (str): Name of the package.
             timestamp (int): Timestamp of the resolve.
-	    approximate (booll): Whether to allow fuzzy timestamp values.
+	    approximate  (bool): Whether to allow fuzzy timestamp values.
         """
         raise NotImplementedError()
 
-    def timestamps(self, name, context):
+    def timestamps(self, context, name):
         """
         Retrieve a list of resolves' timestamps matching the name and context.
 
         Args:
-            name (str): Name of package.
             context (str): Context of package.
+            name    (str): Name of package.
         """
         raise NotImplementedError()
 
@@ -54,14 +54,14 @@ class RezRxtDbWriterI(object):
     """
     Rez Resovle Database Writer Interface.
     """
-    def add_rxt(self, name, context, rxt_dict):
+    def add_rxt(self, context, name, rxt_dict):
         """
         Add a resolve for the given name and context. The timestamp
         will be pulled from the rxt_dict
 
         Args:
-            name (str): Name of the package.
-            context (str): Context of the package.
+            name      (str): Name of the package.
+            context   (str): Context of the package.
             rxt_dict (dict): resolve python dict.
 
         Raises:
@@ -69,12 +69,12 @@ class RezRxtDbWriterI(object):
         """
         raise NotImplementedError()
 
-    def update_rxt(self, name, context, timestamp, rxt_dict):
+    def update_rxt(self, context, name, timestamp, rxt_dict):
         """
         Update an existing resolve, provided one exists matching the supplied keys.
         Args:
-            name (str): name of the package.
-            context (str): context of the package.
+            name      (str): name of the package.
+            context   (str): context of the package.
             timestamp (str): timestamp of the resolve.
             rxt_dict (dict): Python dict of the resolve.
 
