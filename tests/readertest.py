@@ -6,7 +6,7 @@ from os.path import join as pjoin
 import json
 import unittest
 
-from rezrxt.filebacked.reader import RezRxtDbMgr, RezRxtDbReader
+from rezrxt.filebacked.reader import RezRxtDbReadMgr, RezRxtDbReader
 
 RXT_STR =\
 """
@@ -105,16 +105,16 @@ RXT_STR =\
     "patch_locks": {}
 }
 """
-class RezRxtDbMgrTest(unittest.TestCase):
+class RezRxtDbReadMgrTest(unittest.TestCase):
     """
     Tests covering the RezRxtDbMgr.
     """
     def setUp(self):
         """
         Set up.
-        """ 
+        """
         self.db_path = pjoin(realpath(dirname(__file__)), "db_root")
-        self.mgr = RezRxtDbMgr(self.db_path)
+        self.mgr = RezRxtDbReadMgr(self.db_path)
 
     def test_contexts(self):
         """
@@ -199,7 +199,7 @@ class RezRxtDbMgrTest(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             self.mgr.resolve(ctx, pkg, t_stamp_approx, approximate=True)
-       
+
 
 class FileBackedReaderTest(unittest.TestCase):
     """

@@ -19,7 +19,7 @@ import json
 from rezrxt.dbinterface import RezRxtDbReaderI
 
 
-class RezRxtDbMgr(object):
+class RezRxtDbReadMgr(object):
     """
     Common file db manager operations.
     """
@@ -29,6 +29,30 @@ class RezRxtDbMgr(object):
         """
         assert isdir(root_db) is True, "root_db \"{0}\" is not a valid directory."
         self._root_db = root_db
+
+    def root_dir(self):
+        """
+        Return the root directory.
+        """
+        return self._root_db
+
+    def context_dir(self, context):
+        """
+        Given a context, return the context directory.
+        """
+        return pjoin(self._root_db, context)
+
+    def name_dir(self, context, name):
+        """
+        Given a context and name, return the full path to the directory.
+        """
+        return pjoin(self._root_db, context, name)
+
+    def timestamp_dir(self, context, name, timestamp):
+        """
+        Given a context, name, and timestamp, return the full path to the directory.
+        """
+        return pjoin(self._root_db, context, name, str(timestamp))
 
     def contexts(self):
         """
@@ -166,7 +190,7 @@ class RezRxtDbReader(RezRxtDbReaderI):
         Raises:
             AssertionError: If path does not exist.
         """
-        self.rez_rxt_mgr = RezRxtDbMgr(root_db)
+        self.rez_rxt_mgr = RezRxtDbReadMgr(root_db)
         super(RezRxtDbReader, self).__init__()
 
     def rxt_dict(self, context, name, timestamp, approximate=False):

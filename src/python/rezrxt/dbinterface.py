@@ -54,29 +54,29 @@ class RezRxtDbWriterI(object):
     """
     Rez Resovle Database Writer Interface.
     """
-    def add_rxt(self, name, context, timestamp, rxt_dct):
+    def add_rxt(self, name, context, rxt_dict):
         """
-        Add a resolve for the given name, context, and timestamp.
+        Add a resolve for the given name and context. The timestamp
+        will be pulled from the rxt_dict
 
         Args:
             name (str): Name of the package.
             context (str): Context of the package.
-            timestmap: timestamp of the resolve.
-            rxt_dct (dict): resolve python dict.
+            rxt_dict (dict): resolve python dict.
 
         Raises:
             DuplicateKeyError: If a context already exists with the supplied data.
         """
         raise NotImplementedError()
 
-    def update_rxt(self, name, context, timestamp, rxt_dct):
+    def update_rxt(self, name, context, timestamp, rxt_dict):
         """
         Update an existing resolve, provided one exists matching the supplied keys.
         Args:
             name (str): name of the package.
             context (str): context of the package.
             timestamp (str): timestamp of the resolve.
-            rxt_dct (dict): Python dict of the resolve.
+            rxt_dict (dict): Python dict of the resolve.
 
         Raises:
             KeyError: if a composite key constructed by the supplied components does not exist.
