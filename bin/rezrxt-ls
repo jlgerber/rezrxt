@@ -16,7 +16,7 @@ from rezrxt.timeutils import epoc_to_gm_asctime, epoc_to_loc_asctime
 
 def pretty(jdata):
     """
-    selectively print information
+    Selectively print information from resolve.
     """
     print "package requests"
     for val in jdata["package_requests"]:
@@ -28,8 +28,8 @@ def pretty(jdata):
     print "timestamp"
     t_stamp = jdata["timestamp"]
     print "\t{0} | GMT {1} | LOCAL {2} ".format(t_stamp,
-                                                 epoc_to_gm_asctime(t_stamp),
-                                                 epoc_to_loc_asctime(t_stamp))
+                                                epoc_to_gm_asctime(t_stamp),
+                                                epoc_to_loc_asctime(t_stamp))
     print ""
     print "implicit packages"
     for val in jdata["implicit_packages"]:
@@ -43,26 +43,21 @@ def main():
     """
     Main entry point
     """
-    parser = argparse.ArgumentParser(usage="Usage: rezrxt-read [options]",
-                                     description='Add resolve to the rez rxt database.')
-    parser.add_argument('-c', '--contexts', dest='contexts', action="store_true",
+    parser = argparse.ArgumentParser(usage="Usage: rezrxt-ls [options]",
+                                     description='list components in the rez rxt database.')
+    parser.add_argument('cmdargs', nargs='*',
                         help='list contexts')
-    parser.add_argument('-n', '--names', dest='names', type=str, nargs=1,
-                        help='--names <context>')
-    parser.add_argument('-t', '--timestamps', dest='timestamps', type=str, nargs=2,
-                        help='--timestamps <context> <name>')
     parser.add_argument('-g', '--gmt', dest="gmt", action="store_true",
                         help="Report timestamps in gmt time.")
     parser.add_argument('-l', '--loc', dest="loc", action="store_true",
                         help="Report timestamps in local time.")
-    parser.add_argument('-r', '--rxts', dest="rxts", nargs=3,
-                        help="--rxts <category> <name> <timestamp>")
+
     parser.add_argument('-d', '--db', dest='database',
                         help='Optionally provide a path to the root database directory.')
     parser.add_argument('-a', '--approximate', dest="approx", action="store_true",
                         help="In conjunction with -r, find the rxt with the approximate timestmap.")
-    parser.add_argument('-f', '--file', dest="rxtfs", nargs=3,
-                        help="--file <category> <name> <timestamp>")
+    parser.add_argument('-f', '--file', dest="file", action="store_true",
+                        help="print file instead of contents")
     parser.add_argument('-p', '--pretty', dest='pretty', action='store_true',
                         help="In conjuntion with -r, pretty print the results.")
     args = parser.parse_args()
@@ -86,49 +81,43 @@ def main():
         print err
         exit(0)
 
-    if args.contexts:
+    if len(args.cmdargs) == 0:
         for ctx in db_reader.contexts():
             print ctx
         exit(0)
 
-    if args.names:
-        if len(args.names) == 1:
-            for name in db_reader.names(args.names[0]):
-                print name
-            exit(0)
-        else:
-            print "wrong number of arguements"
-            print parser.usage
-            exit(0)
-
-    if args.timestamps:
-
-        if len(args.timestamps) == 2:
-            for t_stamp in db_reader.timestamps(args.timestamps[0], args.timestamps[1]):
-                print epoc_to_gm_asctime(t_stamp) if args.gmt else (\
-                    epoc_to_loc_asctime(t_stamp) if args.loc else t_stamp)
-            exit(0)
-        else:
-            print "wrong number of arguements to --timestamps flag"
-            print parser.usage
-            exit(0)
-
-    if args.rxts:
-        rxt_f = db_reader.resolve(args.rxts[0], args.rxts[1], args.rxts[2],
-                                  approximate=True if args.approx else False)
-
-        with open(rxt_f) as data_file:
-            data = json.load(data_file)
-        if args.pretty:
-            pretty(data)
-        else:
-            pprint(data)
+    if len(args.cmdargs) == 1:
+        for name in db_reader.names(args.cmdargs[0]):
+            print name
         exit(0)
 
-    if args.rxtfs:
-        print db_reader.resolve(args.rxtfs[0], args.rxtfs[1], args.rxtfs[2],
-                                approximate=True if args.approx else False)
+
+    if len(args.cmdargs) == 2:
+        for t_stamp in db_reader.timestamps(args.cmdargs[0], args.cmdargs[1]):
+            print epoc_to_gm_asctime(t_stamp) if args.gmt else (\
+                epoc_to_loc_asctime(t_stamp) if args.loc else t_stamp)
         exit(0)
+
+    try:
+        if len(args.cmdargs) == 3:
+            if args.file:
+                print db_reader.resolve(args.cmdargs[0], args.cmdargs[1], args.cmdargs[2],
+                                        approximate=True if args.approx else False)
+            else:
+                rxt_f = db_reader.resolve(args.cmdargs[0], args.cmdargs[1], args.cmdargs[2],
+                                          approximate=True if args.approx else False)
+
+                with open(rxt_f) as data_file:
+                    data = json.load(data_file)
+                if args.pretty:
+                    pretty(data)
+                else:
+                    pprint(data)
+    except KeyError, err:
+        print err
+        print "Have you tried using the \"--approximate\" flag?"
+    exit(0)
+
     print parser.usage
 
 if __name__ == "__main__":
