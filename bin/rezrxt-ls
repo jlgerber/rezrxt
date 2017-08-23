@@ -87,16 +87,24 @@ def main():
         exit(0)
 
     if len(args.cmdargs) == 1:
-        for name in db_reader.names(args.cmdargs[0]):
-            print name
-        exit(0)
+        try:
+            for name in db_reader.names(args.cmdargs[0]):
+                print name
+        except KeyError, err:
+            print err
+        finally:
+            exit(0)
 
-
+   
     if len(args.cmdargs) == 2:
-        for t_stamp in db_reader.timestamps(args.cmdargs[0], args.cmdargs[1]):
-            print epoc_to_gm_asctime(t_stamp) if args.gmt else (\
-                epoc_to_loc_asctime(t_stamp) if args.loc else t_stamp)
-        exit(0)
+        try:
+            for t_stamp in db_reader.timestamps(args.cmdargs[0], args.cmdargs[1]):
+                print epoc_to_gm_asctime(t_stamp) if args.gmt else (\
+                    epoc_to_loc_asctime(t_stamp) if args.loc else t_stamp)
+        except KeyError, err:
+            print err
+        finally:
+            exit(0)
 
     try:
         if len(args.cmdargs) == 3:
