@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 # copied over to the install directory....
 include(RezBuild)
 
-file(GLOB_RECURSE py_files "src/python/*.py")
+file(GLOB_RECURSE py_files "python/*.py")
 rez_install_python(
     py
     FILES ${py_files}
