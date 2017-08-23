@@ -22,8 +22,7 @@ tools = [
 uuid = "int.rezrxt"
 
 def commands():
-
     env.PYTHONPATH.append("{root}/python")
-    env.ROOT.append("{root}/bin")
+    env.PATH.append("{root}/bin")
    
 
