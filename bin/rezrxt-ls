@@ -53,7 +53,7 @@ def main():
                         help='list contexts')
     parser.add_argument('-d', '--db', dest='database',
                         help=('Optionally provide a path to the root database directory.'
-                              ' Otherwise, use Env Var "REZTXT_DB_ROOT"'))
+                              ' Otherwise, use Env Var "REZRXT_DB_ROOT"'))
     parser.add_argument('-g', '--gmt', dest="gmt", action="store_true",
                         help="Report timestamps in gmt time.")
     parser.add_argument('-l', '--loc', dest="loc", action="store_true",
@@ -68,7 +68,7 @@ def main():
                               " supplying context, name, and timestamp."))
     args = parser.parse_args()
 
-    db_root = args.database or environ.get("REZTXT_DB_ROOT")
+    db_root = args.database or environ.get("REZRXT_DB_ROOT")
 
     if db_root is None:
         print parser.usage
@@ -84,7 +84,7 @@ def main():
     try:
         db_reader = reader.RezRxtDbReader(db_root)
     except RuntimeError, err:
-        print err
+        print err.message
         exit(0)
 
     if len(args.cmdargs) == 0:
@@ -97,7 +97,7 @@ def main():
             for name in db_reader.names(args.cmdargs[0]):
                 print name
         except KeyError, err:
-            print err
+            print err.message
         finally:
             exit(0)
 
@@ -107,7 +107,7 @@ def main():
                 print epoc_to_gm_asctime(t_stamp) if args.gmt else (\
                     epoc_to_loc_asctime(t_stamp) if args.loc else t_stamp)
         except KeyError, err:
-            print err
+            print err.message
         finally:
             exit(0)
 
@@ -130,7 +130,7 @@ def main():
                     pretty(rxt_f)
 
     except KeyError, err:
-        print err
+        print err.message
         print "Have you tried using the \"--approximate\" flag?"
     exit(0)
 
