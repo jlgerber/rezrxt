@@ -14,10 +14,13 @@ description = \
     """
    rezrxt - rez resolve database api & commandline
     """
+
 tools = [
     "rezrxt-add",
     "rezrxt-ls"
 ]
+
+requires = ["rez"]
 
 uuid = "int.rezrxt"
 

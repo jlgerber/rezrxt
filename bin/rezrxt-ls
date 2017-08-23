@@ -4,62 +4,68 @@
 rezrxt-ls
     list components of a resolve (rxt) database.
 """
-
-from os.path import isdir, realpath
-from os import environ
 import argparse
 import json
+from os.path import isdir, realpath
+from os import environ
 from pprint import pprint
+import sys
+import time
 
 from rezrxt.filebacked import reader
+from rez.resolved_context import ResolvedContext
 from rezrxt.timeutils import epoc_to_gm_asctime, epoc_to_loc_asctime
+from rez.utils.colorize import  critical, heading, local, implicit, Printer
 
-def pretty(jdata):
+def pretty(jfile):
     """
     Selectively print information from resolve.
     """
-    print "package requests"
-    for val in jdata["package_requests"]:
-        print "\t{0}".format(val)
-    print ""
-    print "user@host"
-    print "\t{0}@{1}".format(jdata["user"], jdata["host"])
-    print ""
-    print "timestamp"
-    t_stamp = jdata["timestamp"]
+    pr = Printer(sys.stdout)
+
+    resolved = ResolvedContext.load(jfile)
+    pr()
+    pr("Resolve Information", heading)
+    resolved.print_info(verbosity=True)
+
+    pr()
+    pr("timestamp", heading)
+    t_stamp = resolved.created
     print "\t{0} | GMT {1} | LOCAL {2} ".format(t_stamp,
                                                 epoc_to_gm_asctime(t_stamp),
                                                 epoc_to_loc_asctime(t_stamp))
     print ""
-    print "implicit packages"
-    for val in jdata["implicit_packages"]:
-        print "\t{0}".format(val)
-    print ""
-    print "resolved packages"
-    for val in jdata["resolved_packages"]:
-        val2 = val["variables"]
-        print "\t{0}-{1} \t( {2} )".format(val2["name"], val2["version"], val2["location"])
+    pr("tools", heading)
+    for key, val in resolved.get_tools().iteritems():
+        pr("\t{0}".format(key), implicit)
+        for tool in val[1]:
+            print "\t\t{0}".format(tool)
+
+
 def main():
     """
     Main entry point
     """
-    parser = argparse.ArgumentParser(usage="Usage: rezrxt-ls [options] [context [name [timestamp]]]",
+    parser = argparse.ArgumentParser(usage=("Usage: rezrxt-ls [options] "
+                                            "[context [name [timestamp]]]"),
                                      description='list components in the rez rxt database.')
     parser.add_argument('cmdargs', nargs='*',
                         help='list contexts')
+    parser.add_argument('-d', '--db', dest='database',
+                        help=('Optionally provide a path to the root database directory.'
+                              ' Otherwise, use Env Var "REZTXT_DB_ROOT"'))
     parser.add_argument('-g', '--gmt', dest="gmt", action="store_true",
                         help="Report timestamps in gmt time.")
     parser.add_argument('-l', '--loc', dest="loc", action="store_true",
                         help="Report timestamps in local time.")
-
-    parser.add_argument('-d', '--db', dest='database',
-                        help='Optionally provide a path to the root database directory.')
     parser.add_argument('-a', '--approximate', dest="approx", action="store_true",
-                        help="In conjunction with -r, find the rxt with the approximate timestmap.")
+                        help="Find the rxt with the approximate timestmap.")
     parser.add_argument('-f', '--file', dest="file", action="store_true",
-                        help="print file instead of contents")
-    parser.add_argument('-p', '--pretty', dest='pretty', action='store_true',
-                        help="In conjuntion with -r, pretty print the results.")
+                        help=("print file instead of contents when supplying "
+                              "context, name, and timestamp."))
+    parser.add_argument('-r', '--raw', dest='raw', action='store_true',
+                        help=("Print the raw rxt contents when"
+                              " supplying context, name, and timestamp."))
     args = parser.parse_args()
 
     db_root = args.database or environ.get("REZTXT_DB_ROOT")
@@ -95,7 +101,6 @@ def main():
         finally:
             exit(0)
 
-   
     if len(args.cmdargs) == 2:
         try:
             for t_stamp in db_reader.timestamps(args.cmdargs[0], args.cmdargs[1]):
@@ -109,18 +114,21 @@ def main():
     try:
         if len(args.cmdargs) == 3:
             if args.file:
+                timestamp = args.cmdargs[2]
+                timestamp = time.time() if timestamp == "now" else timestamp 
                 print db_reader.resolve(args.cmdargs[0], args.cmdargs[1], args.cmdargs[2],
                                         approximate=True if args.approx else False)
             else:
                 rxt_f = db_reader.resolve(args.cmdargs[0], args.cmdargs[1], args.cmdargs[2],
                                           approximate=True if args.approx else False)
 
-                with open(rxt_f) as data_file:
-                    data = json.load(data_file)
-                if args.pretty:
-                    pretty(data)
-                else:
+                if args.raw:
+                    with open(rxt_f) as data_file:
+                        data = json.load(data_file)
                     pprint(data)
+                else:
+                    pretty(rxt_f)
+
     except KeyError, err:
         print err
         print "Have you tried using the \"--approximate\" flag?"
