@@ -20,7 +20,7 @@ tools = [
     "rezrxt-ls"
 ]
 
-requires = ["rez"]
+requires = ["rez-2+"]
 
 uuid = "int.rezrxt"
 
