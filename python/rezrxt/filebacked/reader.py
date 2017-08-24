@@ -54,6 +54,20 @@ class RezRxtDbReadMgr(object):
         """
         return pjoin(self._root_db, context, name, str(timestamp))
 
+    def rxt_name(self, context, name, timestamp):
+        """
+        Given appropriate information, construct the name of the rxt file.
+        """
+        #assert isinstance (timestamp, (int, long)), "timestamp should be an integer: {0}".format(timestamp)
+        return "{0}-{1}-{2}.rxt".format(context, name, str(timestamp))
+
+    def rxt_path(self, context, name, timestamp):
+        """
+        Build the fullpath of an rxt file given its constituent parts.
+        """
+        return pjoin(self.timestamp_dir(context, name, timestamp),
+                     self.rxt_name(context, name, timestamp))
+
     def contexts(self):
         """
         Return an generator iterator over contexts.

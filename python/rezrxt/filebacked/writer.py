@@ -35,7 +35,9 @@ class RezRxtDbWriteMgr(RezRxtDbReadMgr):
         Write rxt data to directory.
         """
         self.build_dirs(context, name, timestamp)
-
+        rxtpath = self.rxt_path(context, name, timestamp)
+        with open(rxtpath, 'w') as rxt_file:
+            json.dump(rxt_dict, rxt_file)
 
 class RezRxtDbWriter(RezRxtDbWriterI):
     """

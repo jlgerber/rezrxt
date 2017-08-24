@@ -11,6 +11,7 @@ import json
 import argparse
 
 from rezrxt.filebacked import writer
+from rezrxt import constants
 
 def add(db_root, context, name, rxtfile):
     """
@@ -39,9 +40,11 @@ def main():
 
     args = parser.parse_args()
 
-    db_root = args.database or environ.get("REZTXT_DB_ROOT")
+    db_root = args.database or environ.get(constants.REZRXT_DB_ROOT)
 
     if db_root is None:
+        print ("Database not set. Either provide one via -d or set the {0}"
+               " environment variable").format(constants.REZRXT_DB_ROOT)
         print parser.usage
         exit(0)
     else:

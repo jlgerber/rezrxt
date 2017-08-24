@@ -12,6 +12,7 @@ from pprint import pprint
 import sys
 import time
 
+from rezrxt import constants
 from rezrxt.filebacked import reader
 from rez.resolved_context import ResolvedContext
 from rezrxt.timeutils import epoc_to_gm_asctime, epoc_to_loc_asctime
@@ -53,7 +54,7 @@ def main():
                         help='list contexts')
     parser.add_argument('-d', '--db', dest='database',
                         help=('Optionally provide a path to the root database directory.'
-                              ' Otherwise, use Env Var "REZRXT_DB_ROOT"'))
+                              ' Otherwise, use Env Var "{0}"').format(constants.REZRXT_DB_ROOT))
     parser.add_argument('-g', '--gmt', dest="gmt", action="store_true",
                         help="Report timestamps in gmt time.")
     parser.add_argument('-l', '--loc', dest="loc", action="store_true",
@@ -68,7 +69,7 @@ def main():
                               " supplying context, name, and timestamp."))
     args = parser.parse_args()
 
-    db_root = args.database or environ.get("REZRXT_DB_ROOT")
+    db_root = args.database or environ.get(constants.REZRXT_DB_ROOT)
 
     if db_root is None:
         print parser.usage
