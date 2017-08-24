@@ -39,6 +39,7 @@ class RezRxtDbWriteMgr(RezRxtDbReadMgr):
         with open(rxtpath, 'w') as rxt_file:
             json.dump(rxt_dict, rxt_file)
 
+
 class RezRxtDbWriter(RezRxtDbWriterI):
     """
     Write rxt to database.

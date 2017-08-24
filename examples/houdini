@@ -12,11 +12,10 @@ import argparse
 import time
 
 from rez.resolved_context import ResolvedContext
-
 from rezrxt.filebacked import reader
+from rezrxt import constants
 #from rezrxt.timeutils import epoc_to_gm_asctime, epoc_to_loc_asctime
 #from rez.utils.colorize import  critical, heading, local, implicit, Printer
-
 
 
 def invoke_wrapped_tool():
@@ -36,17 +35,17 @@ def invoke_wrapped_tool():
 
     # database
     db_root = wrapper_args.db if wrapper_args and wrapper_args.db\
-              else environ.get("REZRXT_DB_ROOT")
+              else environ.get(constants.REZRXT_DB_ROOT)
 
     if db_root is None:
-        print "Need to set REZRXT_DB_ROOT or set db via --rropt"
+        print "Need to set {0} or set db via --rropt".format(constants.REZRXT_DB_ROOT)
         exit(0)
 
     # Context
     ctx = wrapper_args.context if (wrapper_args and wrapper_args.context)\
-          else environ.get("REZRXT_CTX")
+          else environ.get(constants.REZRXT_CTX)
     if ctx is None:
-        print "Need to supply a context via --rropt set REZRXT_CTX env var"
+        print "Need to supply a context via --rropt set {0} env var".format(constants.REZRXT_CTX)
         exit(0)
 
     # Timestamp
@@ -110,7 +109,7 @@ def parse_wrapped_args(name, args):
     if args is None:
         return None
     fargs = []
-   
+
     for arg in args:
         pieces = arg.split(',')
         for piece in pieces:
