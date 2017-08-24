@@ -30,49 +30,154 @@ class RezRxtDbReadMgr(object):
         assert isdir(root_db) is True, "root_db \"{0}\" is not a valid directory."
         self._root_db = root_db
 
-    def root_dir(self):
+    def root_dir(self, verify=False):
         """
         Return the root directory.
         """
+        if verify:
+            assert isdir(self._root_db) is True, "root_dir() {0} does not exist".format(self._root_db)
         return self._root_db
 
-    def context_dir(self, context):
+    def contexts_dir(self, verify=False):
+        """
+        return the directory which houses all of the contexts.
+        """
+        c_dir = pjoin(self.root_dir(), "context")
+        if verify:
+            if isdir(c_dir) is False:
+                raise KeyError("contexts_dir() - {0} does not exist".format(c_dir))
+        return c_dir
+
+    def context_dir(self, context, verify=False):
         """
         Given a context, return the context directory.
-        """
-        return pjoin(self._root_db, context)
 
-    def name_dir(self, context, name):
+        Args:
+            context (str): the context.
+            verify (bool): whether to verify the existance of the path (default:False)
+        
+        Returns:
+            path (str).
+
+        Raises:
+            KeyError if path does not exist.
+        """
+        c_dir = pjoin(self._root_db, "context", context)
+        if verify:
+            if isdir(c_dir) is False:
+                raise KeyError("context_dir({0}) {1} does not exist".format(context, c_dir))
+        return c_dir
+
+    def names_dir(self, context, verify=False):
+        """
+        Given a context, return the directory in which the names for said context may be found.
+        """
+
+        n_dir = pjoin(self.context_dir(context), "name")
+        if verify:
+            if isdir(n_dir) is False:
+                raise KeyError("names_dir({0}) - {1} does not exist".format(context, n_dir))
+        return n_dir
+
+    def name_dir(self, context, name, verify=False):
         """
         Given a context and name, return the full path to the directory.
-        """
-        return pjoin(self._root_db, context, name)
 
-    def timestamp_dir(self, context, name, timestamp):
+        Args:
+            context (str): the context.
+            name (str): name of the package.
+            verify (bool): whether to verify the existance of the path (default:False)
+   
+        Returns:
+            path (str).
+
+        Raises:
+            KeyError if path directory does not exist and verify is True.
+        """
+        n_dir = pjoin(self.context_dir(context), "name", name)
+        if verify:
+            if isdir(n_dir) is False:
+                raise KeyError("name_dir({0}, {1}) - {2} does not exist".format(context, name, n_dir))
+        return n_dir
+
+    def timestamps_dir(self, context, name, verify=False):
+        """
+        Return the directory in which the timestamps live.
+        """
+        t_dir = pjoin(self.name_dir(context, name), "timestamp")
+        if verify:
+            if isdir(t_dir) is False:
+                raise KeyError("timestamps_dir({0}, {1}) - {2} does not exist".format(context, name, t_dir))
+        return t_dir
+
+    def timestamp_dir(self, context, name, timestamp, verify=False):
         """
         Given a context, name, and timestamp, return the full path to the directory.
+
+        Args:
+            context (str): the context of the package.
+            name (str): the name of the package.
+            timestamp (int | str): the timestamp of the package.
+            verify (bool): Wether to verify the existance of the package. (default: False)
+
+        Returns:
+            directory path.
+
+        Raises:
+            KeyError - if directory does not exist and verify is True.
         """
-        return pjoin(self._root_db, context, name, str(timestamp))
+        t_dir = pjoin(self.name_dir(context, name), "timestamp", str(timestamp))
+        if verify:
+            if isdir(t_dir) is False:
+                raise KeyError("timestmap_dir({0}, {1}, {2}) {3} does not exist."\
+                               .format(context, name, timestamp, t_dir))
+        return t_dir
 
     def rxt_name(self, context, name, timestamp):
         """
         Given appropriate information, construct the name of the rxt file.
+
+        Args:
+            context (str): The context of the package.
+            name (str): The name of the package.
+            timestamp (int): the timestamp of the package resolution.
+
+        Returns:
+            The correctly formatted name of the rxt file as stored in the database.
         """
-        #assert isinstance (timestamp, (int, long)), "timestamp should be an integer: {0}".format(timestamp)
+        #assert isinstance (timestamp, (int, long)),
+        #   "timestamp should be an integer: {0}".format(timestamp)
         return "{0}-{1}-{2}.rxt".format(context, name, str(timestamp))
 
-    def rxt_path(self, context, name, timestamp):
+    def rxt_path(self, context, name, timestamp, verify=False):
         """
         Build the fullpath of an rxt file given its constituent parts.
+
+        Args:
+            context (str): The context of the package.
+            name (str): The name of the package.
+            timestamp (int): The timestamp of the package resolve.
+            verify (bool): whether to verify that the path being constructed, minus the filename, exists.
+        
+        Returns:
+            The path to the rxt file.
+        
+        Raises:
+            KeyError: If a valid path cannot be constructed given the variables.
         """
-        return pjoin(self.timestamp_dir(context, name, timestamp),
+        return pjoin(self.timestamp_dir(context, name, timestamp, verify),
                      self.rxt_name(context, name, timestamp))
 
     def contexts(self):
         """
         Return an generator iterator over contexts.
         """
-        for context in listdir(self._root_db):
+        c_dir = self.contexts_dir()
+        if isdir(c_dir) is False:
+            # empty repo
+            yield None
+
+        for context in listdir(c_dir):
             yield context
 
     def names(self, context):
@@ -88,9 +193,9 @@ class RezRxtDbReadMgr(object):
         Raises:
             KeyError: If the db does not contain the supplied context.
         """
-        namesdir = pjoin(self._root_db, context)
-        if not isdir(namesdir):
-            raise KeyError("No packages exist for \"{0}\" context".format(context))
+        
+        namesdir = self.names_dir(context, verify=True)
+        
         for name in listdir(namesdir):
             yield name
 
@@ -108,16 +213,44 @@ class RezRxtDbReadMgr(object):
         Raises:
             KeyError: If the database does not contain the context or name.
         """
-        namesdir = pjoin(self._root_db, context)
-        if not isdir(namesdir):
-            raise KeyError("No packages exist for \"{0}\" context".format(context))
-        tsdir = pjoin(namesdir, name)
-        if not isdir(tsdir):
-            raise KeyError("No timestamps exist for context:\"{0}\" and name:\"{1}\""\
-                          .format(context, name))
-        # td: protect from cruft. verify that we are returning an integer.
+        tsdir = self.timestamps_dir(context, name, verify=True)
         for tstamp in listdir(tsdir):
             yield int(tstamp)
+
+    def _resolve_approximate(self, context, name, timestamp):
+        """
+        Return the full path to a resolve given an approximate timestamp.
+        """
+
+        # get a find the most
+        def tst(xarg, yarg):
+            """
+            Get the closest value to the timestamp.
+            """
+            if yarg <= timestamp and xarg <= timestamp:
+                return yarg if yarg >= xarg else xarg
+            if yarg <= timestamp:
+                return yarg
+            if xarg <= timestamp:
+                return xarg
+            return 0
+       
+        timestamps =  self.timestamps(context, name)
+        exact_ts = reduce(tst, (int(x) for x in timestamps))
+        if exact_ts == 0:
+            timestamps = [x for x in self.timestamps(context, name)]
+            timestamps.sort()
+            exact_ts = timestamps[0]
+            #raise KeyError("unable to resolve exact timestamp from approximate timestamp {0} for {1}"\
+            #               .format(timestamp, self.timestamps_dir(context, name, verify=True)))
+        return self.rxt_path(context, name, exact_ts, verify=True)
+
+    def _resolve_exact(self, context, name, timestamp):
+        """
+        Return a full path to a resolve given an exact timestamp.
+        """
+        return self.rxt_path(context, name, timestamp)
+
 
     def resolve(self, context, name, timestamp, approximate=False):
         """
@@ -128,7 +261,9 @@ class RezRxtDbReadMgr(object):
             name         (str): The package name.
             timestamp    (int): The timestamp.
             approximate (bool): If true, find the closest timestamp less than or
-                                equal to the one provided.
+                                equal to the one provided. If a timestamp is 
+                                provided which predates all the available timestamps
+                                then we return the smallest extant timestamp.
 
         Returns:
             Path to rxt file.
@@ -136,60 +271,11 @@ class RezRxtDbReadMgr(object):
         Raises:
             KeyError: If db is missing either the context, name, or timestmap.
         """
-        timestamp_str = str(timestamp)
-
-        namesdir = pjoin(self._root_db, context)
-        if not isdir(namesdir):
-            raise KeyError("No packages exist for \"{0}\" context".format(context))
-        tsdir = pjoin(namesdir, name)
-        if not isdir(tsdir):
-            raise KeyError("No timestamps exist for context:\"{0}\" and name:\"{1}\""\
-                .format(context, name))
-
-        resolvedir = None
 
         if approximate is True:
-            # get a find the most
-            def tst(xarg, yarg):
-                """
-                Get the closest value to the timestamp.
-                """
-                if yarg <= timestamp and xarg <= timestamp:
-                    return yarg if yarg >= xarg else xarg
-                if yarg <= timestamp:
-                    return yarg
-                if xarg <= timestamp:
-                    return xarg
-                return 0
-
-            exact_ts = reduce(tst, (int(x) for x in self.timestamps(context, name)))
-
-            if exact_ts == 0:
-                raise RuntimeError("Unable to find exact timestamp for {0} {1} given {2}"\
-                                  .format(context, name, timestamp_str))
-
-            resolvedir = pjoin(tsdir, str(exact_ts))
-            timestamp_str = str(exact_ts)
-            if not isdir(resolvedir):
-                raise KeyError(("No resolve exists for context:\"{0}\" name:\"{1}\""
-                                "derived timestamp: {2}")\
-                              .format(context, name, str(exact_ts)))
+            return self._resolve_approximate(context, name, timestamp)
         else:
-            resolvedir = pjoin(tsdir, timestamp_str)
-
-            if not isdir(resolvedir):
-                raise KeyError(("No resolve exists for context:\"{0}\" "
-                                "name:\"{1}\" timestamp: {2}")\
-                                .format(context, name, str(timestamp)))
-
-        resolve_file = "{0}-{1}-{2}.rxt".format(context, name, timestamp_str)
-        resolve_fullpath = pjoin(resolvedir, resolve_file)
-
-        if not isfile(resolve_fullpath):
-            raise KeyError(("No rxt file \"{3}\" exists for context:\"{0}\" "
-                            "name:\"{1}\" timestamp: {2}")\
-                            .format(context, name, str(timestamp), resolve_fullpath))
-        return resolve_fullpath
+            return self._resolve_exact(context, name, timestamp)
 
 
 class RezRxtDbReader(RezRxtDbReaderI):

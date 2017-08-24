@@ -152,7 +152,7 @@ class RezRxtDbReadMgrTest(unittest.TestCase):
         t_stamp_str = str(t_stamp)
 
         rxt = self.mgr.resolve(ctx, pkg, t_stamp)
-        expected = pjoin(self.db_path, ctx, pkg, t_stamp_str,\
+        expected = pjoin(self.db_path,"context", ctx, "name", pkg, "timestamp", t_stamp_str,\
                           "{0}-{1}-{2}.rxt".format(ctx, pkg, t_stamp_str))
         self.assertEqual(rxt, expected)
 
@@ -168,7 +168,7 @@ class RezRxtDbReadMgrTest(unittest.TestCase):
         t_stamp_str = str(t_stamp)
 
         rxt = self.mgr.resolve(ctx, pkg, t_stamp_approx, approximate=True)
-        expected = pjoin(self.db_path, ctx, pkg, t_stamp_str,\
+        expected = pjoin(self.db_path, "context", ctx, "name", pkg, "timestamp", t_stamp_str,\
                           "{0}-{1}-{2}.rxt".format(ctx, pkg, t_stamp_str))
         self.assertEqual(rxt, expected)
 
@@ -183,7 +183,7 @@ class RezRxtDbReadMgrTest(unittest.TestCase):
         t_stamp_str = str(t_stamp)
 
         rxt = self.mgr.resolve(ctx, pkg, t_stamp_approx, approximate=True)
-        expected = pjoin(self.db_path, ctx, pkg, t_stamp_str,\
+        expected = pjoin(self.db_path, "context", ctx, "name", pkg, "timestamp", t_stamp_str,\
                           "{0}-{1}-{2}.rxt".format(ctx, pkg, t_stamp_str))
         self.assertEqual(rxt, expected)
 
@@ -196,9 +196,11 @@ class RezRxtDbReadMgrTest(unittest.TestCase):
         ctx = "model"
         pkg = "houdini"
         t_stamp_approx = 1103265459
-
-        with self.assertRaises(RuntimeError):
-            self.mgr.resolve(ctx, pkg, t_stamp_approx, approximate=True)
+        ts_str = str(1503265457)
+        rxt = self.mgr.resolve(ctx, pkg, t_stamp_approx, approximate=True)
+        expected =  pjoin(self.db_path, "context", ctx, "name", pkg, "timestamp", ts_str, \
+                          "{0}-{1}-{2}.rxt".format(ctx, pkg, ts_str))
+        self.assertEqual(rxt, expected)
 
 
 class FileBackedReaderTest(unittest.TestCase):
@@ -262,7 +264,7 @@ class FileBackedReaderTest(unittest.TestCase):
         pkg = "houdini"
         t_stamps = ("1503265457", "1503266406")
         files = list(self.reader.rxt_files(ctx, pkg))
-        base_path = pjoin(self.db_path, "model", "houdini")
+        base_path = pjoin(self.db_path, "context", "model", "name", "houdini", "timestamp")
         expected = [pjoin(base_path, t_stamps[0], "{0}-{1}-{2}.rxt".format(ctx, pkg, t_stamps[0])),
                     pjoin(base_path, t_stamps[1], "{0}-{1}-{2}.rxt".format(ctx, pkg, t_stamps[1]))]
         self.assertEqual(files, expected)
