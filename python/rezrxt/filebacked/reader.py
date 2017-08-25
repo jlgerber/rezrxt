@@ -290,7 +290,7 @@ class RezRxtDbReader(RezRxtDbReaderI):
         Raises:
             AssertionError: If path does not exist.
         """
-        self.rez_rxt_mgr = RezRxtDbReadMgr(root_db)
+        self.read_mgr = RezRxtDbReadMgr(root_db)
         super(RezRxtDbReader, self).__init__()
 
     def rxt_dict(self, context, name, timestamp, approximate=False):
@@ -310,7 +310,7 @@ class RezRxtDbReader(RezRxtDbReaderI):
         Raises:
             RuntimeError if not extant.
         """
-        rxt_file = self.rez_rxt_mgr.resolve(context, name, timestamp, approximate)
+        rxt_file = self.read_mgr.resolve(context, name, timestamp, approximate)
 
         with open(rxt_file) as f_handle:
             data = json.load(f_handle)
@@ -322,7 +322,7 @@ class RezRxtDbReader(RezRxtDbReaderI):
         Return a generator of contexts.
         """
 
-        return self.rez_rxt_mgr.contexts()
+        return self.read_mgr.contexts()
 
 
     def names(self, context):
@@ -338,7 +338,7 @@ class RezRxtDbReader(RezRxtDbReaderI):
         Raises:
             KeyError: If context does not exist in DB.
         """
-        return self.rez_rxt_mgr.names(context)
+        return self.read_mgr.names(context)
 
 
     def timestamps(self, context, name):
@@ -356,7 +356,7 @@ class RezRxtDbReader(RezRxtDbReaderI):
             KeyError: If supplied with non-extant keys.
         """
 
-        return self.rez_rxt_mgr.timestamps(context, name)
+        return self.read_mgr.timestamps(context, name)
 
     def rxt_files(self, context, name):
         """
@@ -372,11 +372,11 @@ class RezRxtDbReader(RezRxtDbReaderI):
         Raises:
             KeyError: if supplied with non-extant keys.
         """
-        for t_stamp in self.rez_rxt_mgr.timestamps(context, name):
-            yield self.rez_rxt_mgr.resolve(context, name, t_stamp)
+        for t_stamp in self.read_mgr.timestamps(context, name):
+            yield self.read_mgr.resolve(context, name, t_stamp)
 
     def resolve(self, context, name, timestamp, approximate=False):
         """
         Get the rxt file matching the parameters
         """
-        return self.rez_rxt_mgr.resolve(context, name, timestamp, approximate)
+        return self.read_mgr.resolve(context, name, timestamp, approximate)
