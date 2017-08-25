@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+"""
+Set rezrxt variables
+"""
+
+import argparse
+from os import environ
+from os.path import basename
+import sys
+
+from rezrxt import constants
+
+__all__ = []
+
+_MAPPING = {'c' : constants.REZRXT_CTX, 'context' : constants.REZRXT_CTX}
+
+class Shell(object):
+    """
+    simple interface for setting env vars.
+    """
+    def set_env(self, key, value):
+        """
+        set an env var.
+
+        Args:
+            key (str): env var key.
+            value: env var value.
+        """
+        raise NotImplementedError()
+
+   
+class BashShell(object):
+    def set_env(self, key, value):
+        """
+        set env var
+        """
+        print >> sys.stderr, "export {0}={1}".format(key, value)
+        print "export {0}={1}".format(key, value)
+
+
+class TcshShell(object):
+    def set_env(self, key, value):
+        """
+        Just like the rest of the implementations.
+        """
+        print  "setenv {0} {1}".format(key, value)
+
+def doit():
+    """
+    main entrypoint.
+    """
+    args = parse_args()
+    shell_name = environ.get("SHELL")
+
+    if shell_name:
+        shell_name = "{0}Shell".format(basename(shell_name).title())
+        print >> sys.stderr, "Identified shell: {0}".format(shell_name)
+
+        Shell_ = getattr(sys.modules[__name__], shell_name)
+        shell = Shell_()
+    else:
+        raise RuntimeError("unable to determine appropriate shell. Set SHELL env var.")
+
+    if args.query:
+        for arg in args.cmdargs:
+            query(arg)
+        sys.exit(0)
+
+    if args.context:
+        print >> sys.stderr, "setting {0} to {1}".format(constants.REZRXT_CTX, args.context)
+        shell.set_env(constants.REZRXT_CTX, args.context)
+
+def query(item):
+    """
+    print the state of the item.
+    """
+    env_var = _MAPPING.get(item)
+    if item:
+        env_val = environ.get(env_var)
+        print >> sys.stderr, "{0}  ({1}) = {2}".format(item, env_var, env_val)
+    else:
+        print >> sys.stderr,  "{0} NOT TRACKED".format(item)
+
+
+def parse_args():
+    """
+    Parse the command line arguments.abs
+
+    Returns:
+        argparse args.`
+    """
+    parser = argparse.ArgumentParser(usage="Usage: rezrxt-set [options]",
+                                     description='persist rezrxt state.')
+    parser.add_argument('cmdargs', nargs='*',
+                        help='query mode parameters.')
+    parser.add_argument('-c', "--context", dest='context',
+                        help='set rezrxt context')
+    parser.add_argument("-q", '--query', action='store_true', dest='query',
+                        help="Set command to query mode")
+
+    args = parser.parse_args()
+    return args
+
+if __name__ == "__main__":
+    doit()
